@@ -182,7 +182,7 @@ describe('Integration Tests', () => {
 			
 			try {
 				await plugin.loadModel();
-			} catch (_error) {
+			} catch {
 				// Expected error
 			}
 
@@ -199,7 +199,7 @@ describe('Integration Tests', () => {
 			
 			try {
 				await plugin.loadModel();
-			} catch (_error) {
+			} catch {
 				// Expected error
 			}
 			

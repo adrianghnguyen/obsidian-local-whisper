@@ -142,6 +142,7 @@ export default class LocalWhisperPlugin extends Plugin {
 			'whisper-status-error'
 		);
 		
+		/* eslint-disable obsidianmd/ui/sentence-case -- status labels use intentional casing */
 		switch (status) {
 			case ModelStatus.NOT_LOADED:
 				this.statusBarItem.textContent = '🔴 model not loaded (click to load)';
@@ -160,6 +161,7 @@ export default class LocalWhisperPlugin extends Plugin {
 				this.statusBarItem.classList.add('whisper-status-error');
 				break;
 		}
+		/* eslint-enable obsidianmd/ui/sentence-case */
 	}
 	
 	async loadModel(): Promise<void> {

@@ -31,4 +31,14 @@ export default tseslint.config(
 		"versions.json",
 		"main.js",
 	]),
+	{
+		files: ["vitest.config.ts"],
+		languageOptions: {
+			globals: { __dirname: "readonly" },
+		},
+		rules: {
+			"import/no-nodejs-modules": "off",
+			"no-undef": "off",
+		},
+	},
 );

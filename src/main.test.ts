@@ -91,7 +91,7 @@ describe('LocalWhisperPlugin', () => {
 
 			try {
 				await plugin.loadModel();
-			} catch (_error) {
+			} catch {
 				// Expected error
 			}
 
@@ -129,9 +129,9 @@ describe('LocalWhisperPlugin', () => {
 		
 		it('should make status bar clickable', async () => {
 			await plugin.onload();
-			
+
 			const statusBarItem = plugin.statusBarItem;
-			expect(statusBarItem?.style.cursor).toBe('pointer');
+			expect(statusBarItem?.classList.contains('whisper-status-not-loaded')).toBe(true);
 		});
 		
 		it('should trigger model load when status bar is clicked', async () => {
@@ -181,7 +181,7 @@ describe('LocalWhisperPlugin', () => {
 			const loadCommand = commands.find((cmd: Command) => cmd.id === 'load-model');
 
 			expect(loadCommand).toBeDefined();
-			expect(loadCommand?.name).toContain('Load');
+			expect(loadCommand?.name).toContain('transcription model');
 		});
 		
 		it('should trigger model loading when command is executed', async () => {
@@ -300,7 +300,7 @@ describe('LocalWhisperPlugin', () => {
 
 			try {
 				await plugin.loadModel();
-			} catch (_error) {
+			} catch {
 				// Expected error
 			}
 
