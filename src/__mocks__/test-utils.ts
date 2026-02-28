@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import type { App, Workspace, Vault } from 'obsidian';
+import type { App, Workspace, Vault, Command } from 'obsidian';
 
 export function createMockApp(): App {
 	return {
@@ -30,7 +30,7 @@ export function createMockPlugin() {
 		loadData: vi.fn().mockResolvedValue({}),
 		saveData: vi.fn().mockResolvedValue(undefined),
 		addRibbonIcon: vi.fn().mockReturnValue(document.createElement('div')),
-		addCommand: vi.fn((cmd) => cmd),
+		addCommand: vi.fn((cmd: Command) => cmd),
 		addSettingTab: vi.fn(),
 		addStatusBarItem: vi.fn(() => {
 			const el = document.createElement('div');
@@ -48,5 +48,5 @@ export function waitFor(ms: number): Promise<void> {
 }
 
 export function flushPromises(): Promise<void> {
-	return new Promise((resolve) => setImmediate(resolve));
+	return new Promise((resolve) => setTimeout(resolve, 0));
 }

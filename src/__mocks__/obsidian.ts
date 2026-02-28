@@ -1,5 +1,3 @@
-import { vi } from 'vitest';
-
 export class Notice {
 	message: string;
 	
@@ -206,9 +204,7 @@ export interface Vault {
 	};
 }
 
-export interface EventRef {
-	// Mock event reference
-}
+export type EventRef = object;
 
 export interface Command {
 	id: string;

@@ -22,7 +22,7 @@ jobs:
 
       - name: Build plugin
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
 
       - name: Create release

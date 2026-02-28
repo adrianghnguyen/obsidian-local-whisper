@@ -14,7 +14,6 @@ export default class LocalWhisperPlugin extends Plugin {
 		this.transcriptionService = new TranscriptionService(this.settings.modelName);
 		
 		this.statusBarItem = this.addStatusBarItem();
-		this.statusBarItem.style.cursor = 'pointer';
 		this.setupStatusBar();
 		
 		this.transcriptionService.setProgressCallback((info) => {
@@ -36,16 +35,16 @@ export default class LocalWhisperPlugin extends Plugin {
 		this.addCommand({
 			id: 'transcribe-and-insert',
 			name: 'Record and insert transcription at cursor',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
+			editorCallback: (editor: Editor, _view: MarkdownView) => {
 				this.openRecordingModal(editor);
 			}
 		});
 		
 		this.addCommand({
 			id: 'load-model',
-			name: 'Download/Load transcription model',
+			name: 'Download/load transcription model',
 			callback: () => {
-				this.loadModel();
+				void this.loadModel();
 			}
 		});
 
@@ -121,9 +120,9 @@ export default class LocalWhisperPlugin extends Plugin {
 		this.updateStatusBar();
 		
 		this.statusBarItem.onclick = () => {
-			if (this.transcriptionService.getStatus() === ModelStatus.NOT_LOADED || 
+			if (this.transcriptionService.getStatus() === ModelStatus.NOT_LOADED ||
 			    this.transcriptionService.getStatus() === ModelStatus.ERROR) {
-				this.loadModel();
+				void this.loadModel();
 			}
 		};
 	}
@@ -145,7 +144,7 @@ export default class LocalWhisperPlugin extends Plugin {
 		
 		switch (status) {
 			case ModelStatus.NOT_LOADED:
-				this.statusBarItem.textContent = '🔴 Model not loaded (click to load)';
+				this.statusBarItem.textContent = '🔴 model not loaded (click to load)';
 				this.statusBarItem.classList.add('whisper-status-not-loaded');
 				break;
 			case ModelStatus.DOWNLOADING:

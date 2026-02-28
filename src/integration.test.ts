@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { Command } from 'obsidian';
 import LocalWhisperPlugin from './main';
 import { ModelStatus } from './transcription-service';
 import { createMockPlugin, flushPromises } from './__mocks__/test-utils';
@@ -99,11 +100,11 @@ describe('Integration Tests', () => {
 			
 			await plugin.onload();
 			
-			const commands = mockPluginBase.addCommand.mock.calls.map(call => call[0]);
-			const loadCommand = commands.find(cmd => cmd.id === 'load-model');
-			
+			const commands = mockPluginBase.addCommand.mock.calls.map((call: [Command]) => call[0]);
+			const loadCommand = commands.find((cmd: Command) => cmd.id === 'load-model');
+
 			expect(plugin.transcriptionService.getStatus()).toBe(ModelStatus.NOT_LOADED);
-			
+
 			loadCommand?.callback?.();
 			await flushPromises();
 			
@@ -181,10 +182,10 @@ describe('Integration Tests', () => {
 			
 			try {
 				await plugin.loadModel();
-			} catch (error) {
+			} catch (_error) {
 				// Expected error
 			}
-			
+
 			expect(statusBarItem?.textContent).toContain('Error');
 			expect(plugin.transcriptionService.getStatus()).toBe(ModelStatus.ERROR);
 		});
@@ -198,7 +199,7 @@ describe('Integration Tests', () => {
 			
 			try {
 				await plugin.loadModel();
-			} catch (error) {
+			} catch (_error) {
 				// Expected error
 			}
 			

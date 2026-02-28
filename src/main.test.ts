@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { Command } from 'obsidian';
 import LocalWhisperPlugin from './main';
 import { ModelStatus } from './transcription-service';
 import { createMockPlugin, flushPromises } from './__mocks__/test-utils';
@@ -85,15 +86,15 @@ describe('LocalWhisperPlugin', () => {
 		
 		it('should update status bar text on error', async () => {
 			mockPipeline.mockRejectedValue(new Error('Network error'));
-			
+
 			await plugin.onload();
-			
+
 			try {
 				await plugin.loadModel();
-			} catch (error) {
+			} catch (_error) {
 				// Expected error
 			}
-			
+
 			const statusBarItem = plugin.statusBarItem;
 			expect(statusBarItem?.textContent).toContain('Error');
 		});
@@ -175,10 +176,10 @@ describe('LocalWhisperPlugin', () => {
 	describe('Manual Load Command', () => {
 		it('should register "Load Model" command', async () => {
 			await plugin.onload();
-			
-			const commands = mockPluginBase.addCommand.mock.calls.map(call => call[0]);
-			const loadCommand = commands.find(cmd => cmd.id === 'load-model');
-			
+
+			const commands = mockPluginBase.addCommand.mock.calls.map((call: [Command]) => call[0]);
+			const loadCommand = commands.find((cmd: Command) => cmd.id === 'load-model');
+
 			expect(loadCommand).toBeDefined();
 			expect(loadCommand?.name).toContain('Load');
 		});
@@ -186,14 +187,14 @@ describe('LocalWhisperPlugin', () => {
 		it('should trigger model loading when command is executed', async () => {
 			const mockTranscriber = vi.fn().mockResolvedValue({ text: 'test' });
 			mockPipeline.mockResolvedValue(mockTranscriber);
-			
+
 			await plugin.onload();
-			
-			const commands = mockPluginBase.addCommand.mock.calls.map(call => call[0]);
-			const loadCommand = commands.find(cmd => cmd.id === 'load-model');
-			
+
+			const commands = mockPluginBase.addCommand.mock.calls.map((call: [Command]) => call[0]);
+			const loadCommand = commands.find((cmd: Command) => cmd.id === 'load-model');
+
 			expect(plugin.transcriptionService.getStatus()).toBe(ModelStatus.NOT_LOADED);
-			
+
 			loadCommand?.callback?.();
 			await flushPromises();
 			
@@ -211,12 +212,12 @@ describe('LocalWhisperPlugin', () => {
 			}));
 			
 			await plugin.onload();
-			
-			const commands = mockPluginBase.addCommand.mock.calls.map(call => call[0]);
-			const loadCommand = commands.find(cmd => cmd.id === 'load-model');
-			
+
+			const commands = mockPluginBase.addCommand.mock.calls.map((call: [Command]) => call[0]);
+			const loadCommand = commands.find((cmd: Command) => cmd.id === 'load-model');
+
 			await loadCommand?.callback?.();
-			
+
 			expect(plugin.transcriptionService.getStatus()).toBe(ModelStatus.READY);
 		});
 	});
@@ -294,15 +295,15 @@ describe('LocalWhisperPlugin', () => {
 		
 		it('should apply "error" class when there is an error', async () => {
 			mockPipeline.mockRejectedValue(new Error('Network error'));
-			
+
 			await plugin.onload();
-			
+
 			try {
 				await plugin.loadModel();
-			} catch (error) {
+			} catch (_error) {
 				// Expected error
 			}
-			
+
 			const statusBarItem = plugin.statusBarItem;
 			expect(statusBarItem?.classList.contains('whisper-status-error')).toBe(true);
 		});

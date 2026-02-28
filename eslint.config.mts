@@ -14,7 +14,6 @@ export default tseslint.config(
 					allowDefaultProject: [
 						'eslint.config.js',
 						'manifest.json',
-						'vitest.config.ts'
 					]
 				},
 				tsconfigRootDir: import.meta.dirname,
