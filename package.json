@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-local-whisper",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "Local speech-to-text transcription plugin for Obsidian using Whisper AI",
 	"main": "main.js",
 	"type": "module",
