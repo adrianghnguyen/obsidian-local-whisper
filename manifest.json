@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Record audio and transcribe speech-to-text locally using Whisper AI. Fully offline, private, and self-contained.",
-	"author": "Your Name",
-	"authorUrl": "",
+	"author": "Adrian Nguyen",
+	"authorUrl": "https://github.com/adrianguyen",
 	"isDesktopOnly": false
 }
