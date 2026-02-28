@@ -1,16 +1,25 @@
 import {Editor, MarkdownView, Notice, Plugin} from 'obsidian';
 import {DEFAULT_SETTINGS, LocalWhisperSettings, LocalWhisperSettingTab} from "./settings";
 import {RecordingModal} from "./recording-modal";
-import {TranscriptionService} from "./transcription-service";
+import {TranscriptionService, ModelStatus} from "./transcription-service";
 
 export default class LocalWhisperPlugin extends Plugin {
 	settings: LocalWhisperSettings;
 	transcriptionService: TranscriptionService;
+	statusBarItem: HTMLElement | undefined;
 
 	async onload() {
 		await this.loadSettings();
 
 		this.transcriptionService = new TranscriptionService(this.settings.modelName);
+		
+		this.statusBarItem = this.addStatusBarItem();
+		this.statusBarItem.style.cursor = 'pointer';
+		this.setupStatusBar();
+		
+		this.transcriptionService.setProgressCallback((info) => {
+			this.updateStatusBar();
+		});
 
 		this.addRibbonIcon('microphone', 'Record audio for transcription', () => {
 			this.openRecordingModal();
@@ -29,6 +38,14 @@ export default class LocalWhisperPlugin extends Plugin {
 			name: 'Record and insert transcription at cursor',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				this.openRecordingModal(editor);
+			}
+		});
+		
+		this.addCommand({
+			id: 'load-model',
+			name: 'Download/Load transcription model',
+			callback: () => {
+				this.loadModel();
 			}
 		});
 
@@ -92,6 +109,67 @@ export default class LocalWhisperPlugin extends Plugin {
 		
 		if (this.transcriptionService) {
 			this.transcriptionService.updateModel(this.settings.modelName);
+			this.updateStatusBar();
+		}
+	}
+	
+	setupStatusBar(): void {
+		if (!this.statusBarItem) {
+			return;
+		}
+		
+		this.updateStatusBar();
+		
+		this.statusBarItem.onclick = () => {
+			if (this.transcriptionService.getStatus() === ModelStatus.NOT_LOADED || 
+			    this.transcriptionService.getStatus() === ModelStatus.ERROR) {
+				this.loadModel();
+			}
+		};
+	}
+	
+	updateStatusBar(): void {
+		if (!this.statusBarItem) {
+			return;
+		}
+		
+		const status = this.transcriptionService.getStatus();
+		const progress = this.transcriptionService.getProgress();
+		
+		this.statusBarItem.classList.remove(
+			'whisper-status-not-loaded',
+			'whisper-status-downloading',
+			'whisper-status-ready',
+			'whisper-status-error'
+		);
+		
+		switch (status) {
+			case ModelStatus.NOT_LOADED:
+				this.statusBarItem.textContent = '🔴 Model not loaded (click to load)';
+				this.statusBarItem.classList.add('whisper-status-not-loaded');
+				break;
+			case ModelStatus.DOWNLOADING:
+				this.statusBarItem.textContent = `⏳ Downloading whisper model... ${progress}%`;
+				this.statusBarItem.classList.add('whisper-status-downloading');
+				break;
+			case ModelStatus.READY:
+				this.statusBarItem.textContent = '✓ Ready to transcribe';
+				this.statusBarItem.classList.add('whisper-status-ready');
+				break;
+			case ModelStatus.ERROR:
+				this.statusBarItem.textContent = '❌ Error loading model (click to retry)';
+				this.statusBarItem.classList.add('whisper-status-error');
+				break;
+		}
+	}
+	
+	async loadModel(): Promise<void> {
+		try {
+			await this.transcriptionService.initialize();
+			this.updateStatusBar();
+		} catch (error) {
+			this.updateStatusBar();
+			throw error;
 		}
 	}
 }

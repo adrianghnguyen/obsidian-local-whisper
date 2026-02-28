@@ -28,3 +28,22 @@
 	max-width: 200px;
 	padding: 10px 20px;
 }
+
+.status-bar-item.whisper-status-not-loaded {
+	cursor: pointer;
+}
+
+.status-bar-item.whisper-status-downloading {
+	color: var(--text-accent);
+	cursor: default;
+}
+
+.status-bar-item.whisper-status-ready {
+	color: var(--text-success);
+	cursor: default;
+}
+
+.status-bar-item.whisper-status-error {
+	color: var(--text-error);
+	cursor: pointer;
+}
