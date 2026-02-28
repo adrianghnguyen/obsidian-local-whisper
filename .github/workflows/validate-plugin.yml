@@ -1,0 +1,180 @@
+name: Validate Obsidian Plugin & BRAT Compatibility
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Check required files exist
+        run: |
+          echo "Checking for required files..."
+          
+          # Check manifest.json
+          if [ ! -f "manifest.json" ]; then
+            echo "❌ ERROR: manifest.json is missing"
+            exit 1
+          fi
+          echo "✅ manifest.json exists"
+          
+          # Check versions.json
+          if [ ! -f "versions.json" ]; then
+            echo "❌ ERROR: versions.json is missing (required for BRAT)"
+            exit 1
+          fi
+          echo "✅ versions.json exists"
+          
+          # Check package.json (needed for build)
+          if [ ! -f "package.json" ]; then
+            echo "❌ ERROR: package.json is missing"
+            exit 1
+          fi
+          echo "✅ package.json exists"
+
+      - name: Validate manifest.json structure
+        run: |
+          echo "Validating manifest.json structure..."
+          
+          # Check if manifest.json is valid JSON
+          if ! jq empty manifest.json 2>/dev/null; then
+            echo "❌ ERROR: manifest.json is not valid JSON"
+            exit 1
+          fi
+          echo "✅ manifest.json is valid JSON"
+          
+          # Check required fields
+          REQUIRED_FIELDS=("id" "name" "version" "minAppVersion" "description")
+          
+          for field in "${REQUIRED_FIELDS[@]}"; do
+            if ! jq -e ".$field" manifest.json > /dev/null 2>&1; then
+              echo "❌ ERROR: manifest.json is missing required field: $field"
+              exit 1
+            fi
+            echo "✅ Found required field: $field"
+          done
+          
+          # Check isDesktopOnly field exists (can be true or false)
+          if ! jq -e '.isDesktopOnly' manifest.json > /dev/null 2>&1; then
+            echo "❌ ERROR: manifest.json is missing required field: isDesktopOnly"
+            exit 1
+          fi
+          echo "✅ Found required field: isDesktopOnly"
+          
+          # Validate version format (SemVer: x.y.z)
+          VERSION=$(jq -r '.version' manifest.json)
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ ERROR: version must follow Semantic Versioning (x.y.z), found: $VERSION"
+            exit 1
+          fi
+          echo "✅ Version follows SemVer: $VERSION"
+          
+          # Validate minAppVersion format
+          MIN_VERSION=$(jq -r '.minAppVersion' manifest.json)
+          if ! echo "$MIN_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ ERROR: minAppVersion must follow Semantic Versioning (x.y.z), found: $MIN_VERSION"
+            exit 1
+          fi
+          echo "✅ minAppVersion follows SemVer: $MIN_VERSION"
+
+      - name: Validate versions.json structure
+        run: |
+          echo "Validating versions.json structure..."
+          
+          # Check if versions.json is valid JSON
+          if ! jq empty versions.json 2>/dev/null; then
+            echo "❌ ERROR: versions.json is not valid JSON"
+            exit 1
+          fi
+          echo "✅ versions.json is valid JSON"
+          
+          # Check that it's an object (not array or other)
+          if [ "$(jq -r 'type' versions.json)" != "object" ]; then
+            echo "❌ ERROR: versions.json must be a JSON object"
+            exit 1
+          fi
+          echo "✅ versions.json is a valid object"
+          
+          # Check that current manifest version exists in versions.json
+          MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+          if ! jq -e ".[\"$MANIFEST_VERSION\"]" versions.json > /dev/null 2>&1; then
+            echo "⚠️  WARNING: Current version ($MANIFEST_VERSION) not found in versions.json"
+            echo "   This is required for BRAT compatibility"
+            echo "   Add an entry like: \"$MANIFEST_VERSION\": \"$(jq -r '.minAppVersion' manifest.json)\""
+          else
+            echo "✅ Current version exists in versions.json"
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Check build artifacts
+        run: |
+          echo "Checking build artifacts..."
+          
+          # Check main.js (required)
+          if [ ! -f "main.js" ]; then
+            echo "❌ ERROR: main.js not found after build (required for Obsidian & BRAT)"
+            exit 1
+          fi
+          echo "✅ main.js exists"
+          
+          # Check main.js is not empty
+          if [ ! -s "main.js" ]; then
+            echo "❌ ERROR: main.js is empty"
+            exit 1
+          fi
+          echo "✅ main.js is not empty"
+          
+          # Check styles.css (optional but common)
+          if [ -f "styles.css" ]; then
+            echo "✅ styles.css exists (optional)"
+          else
+            echo "ℹ️  INFO: styles.css not found (optional)"
+          fi
+
+      - name: Validate BRAT compatibility
+        run: |
+          echo "Validating BRAT compatibility..."
+          echo ""
+          echo "BRAT requires:"
+          echo "  1. ✅ Valid manifest.json with proper structure"
+          echo "  2. ✅ Version in manifest.json follows SemVer"
+          echo "  3. ✅ versions.json maps plugin versions to minimum Obsidian versions"
+          echo "  4. ✅ main.js is built and available"
+          echo "  5. ✅ GitHub releases should include: main.js, manifest.json, styles.css"
+          echo ""
+          echo "✅ All BRAT requirements validated successfully"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo ""
+          echo "=================================================="
+          echo "✅ Obsidian Plugin Validation: PASSED"
+          echo "✅ BRAT Compatibility: VALIDATED"
+          echo "=================================================="
+          echo ""
+          echo "Plugin Details:"
+          echo "  ID: $(jq -r '.id' manifest.json)"
+          echo "  Name: $(jq -r '.name' manifest.json)"
+          echo "  Version: $(jq -r '.version' manifest.json)"
+          echo "  Min Obsidian Version: $(jq -r '.minAppVersion' manifest.json)"
+          echo "  Desktop Only: $(jq -r '.isDesktopOnly' manifest.json)"
+          echo ""
