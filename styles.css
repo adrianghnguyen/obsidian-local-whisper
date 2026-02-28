@@ -1,0 +1,30 @@
+.whisper-status {
+	text-align: center;
+	margin: 20px 0;
+	padding: 10px;
+	background: var(--background-secondary);
+	border-radius: 5px;
+	font-weight: 500;
+}
+
+.whisper-timer {
+	text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+	margin: 20px 0;
+	font-family: 'Courier New', monospace;
+	color: var(--text-accent);
+}
+
+.whisper-buttons {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	margin-top: 20px;
+}
+
+.whisper-buttons button {
+	flex: 1;
+	max-width: 200px;
+	padding: 10px 20px;
+}
