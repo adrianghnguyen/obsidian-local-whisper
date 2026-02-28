@@ -25,6 +25,7 @@ export function createMockPlugin() {
 			version: '1.0.0',
 			minAppVersion: '0.15.0',
 			description: 'Test plugin',
+			author: 'Test Author',
 		},
 		loadData: vi.fn().mockResolvedValue({}),
 		saveData: vi.fn().mockResolvedValue(undefined),
