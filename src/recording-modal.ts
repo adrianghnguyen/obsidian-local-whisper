@@ -29,7 +29,7 @@ export class RecordingModal extends Modal {
 		const {contentEl} = this;
 		contentEl.empty();
 		
-		contentEl.createEl('h2', {text: 'Record Audio'});
+		contentEl.createEl('h2', {text: 'Record audio'});
 		
 		this.statusElement = contentEl.createEl('div', {
 			cls: 'whisper-status',
@@ -44,13 +44,15 @@ export class RecordingModal extends Modal {
 		const buttonContainer = contentEl.createEl('div', {cls: 'whisper-buttons'});
 		
 		this.recordButton = buttonContainer.createEl('button', {
-			text: 'Start Recording',
+			text: 'Start recording',
 			cls: 'mod-cta'
 		});
-		this.recordButton.addEventListener('click', () => this.startRecording());
+		this.recordButton.addEventListener('click', () => {
+			void this.startRecording();
+		});
 		
 		this.stopButton = buttonContainer.createEl('button', {
-			text: 'Stop & Transcribe',
+			text: 'Stop & transcribe',
 			cls: 'mod-warning'
 		});
 		this.stopButton.disabled = true;

@@ -26,16 +26,18 @@ export class LocalWhisperSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Local Whisper Settings'});
+		new Setting(containerEl)
+			.setName('Local whisper')
+			.setHeading();
 
 		new Setting(containerEl)
-			.setName('Model')
-			.setDesc('Whisper model to use for transcription')
+			.setName('Transcription model')
+			.setDesc('Model to use for transcription')
 			.addDropdown(dropdown => dropdown
-				.addOption('Xenova/whisper-tiny.en', 'Tiny English (39MB, fastest)')
-				.addOption('Xenova/whisper-tiny', 'Tiny Multilingual (39MB)')
-				.addOption('Xenova/whisper-base.en', 'Base English (74MB, better accuracy)')
-				.addOption('Xenova/whisper-base', 'Base Multilingual (74MB)')
+				.addOption('Xenova/whisper-tiny.en', 'Tiny english only (39 mb, fastest)')
+				.addOption('Xenova/whisper-tiny', 'Tiny multilingual (39 mb)')
+				.addOption('Xenova/whisper-base.en', 'Base english only (74 mb, better accuracy)')
+				.addOption('Xenova/whisper-base', 'Base multilingual (74 mb)')
 				.setValue(this.plugin.settings.modelName)
 				.onChange(async (value) => {
 					this.plugin.settings.modelName = value;

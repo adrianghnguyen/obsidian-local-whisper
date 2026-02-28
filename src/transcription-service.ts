@@ -1,8 +1,23 @@
 import {pipeline} from '@huggingface/transformers';
 import {Notice} from 'obsidian';
 
+type TranscriberPipeline = (
+	audio: Float32Array,
+	options?: TranscriptionOptions
+) => Promise<TranscriptionResult>;
+
+interface TranscriptionOptions {
+	chunk_length_s?: number;
+	stride_length_s?: number;
+	language?: string;
+}
+
+interface TranscriptionResult {
+	text: string;
+}
+
 export class TranscriptionService {
-	private transcriber: any = null;
+	private transcriber: TranscriberPipeline | null = null;
 	private isInitializing = false;
 	private modelName: string;
 
@@ -18,16 +33,17 @@ export class TranscriptionService {
 		this.isInitializing = true;
 
 		try {
-			new Notice('Loading Whisper model... This may take a moment on first use.');
+			new Notice('Loading transcription model - this may take a moment on first use');
 			
-			this.transcriber = await pipeline(
+			const model = await pipeline(
 				'automatic-speech-recognition',
 				this.modelName
 			);
+			this.transcriber = model as unknown as TranscriberPipeline;
 			
-			new Notice('Whisper model loaded successfully!');
+			new Notice('Transcription model loaded');
 		} catch (error) {
-			new Notice('Failed to load Whisper model. Check console for details.');
+			new Notice('Failed to load transcription model - check console for details');
 			console.error('Model loading error:', error);
 			throw error;
 		} finally {
@@ -45,7 +61,7 @@ export class TranscriptionService {
 		}
 
 		try {
-			const options: any = {
+			const options: TranscriptionOptions = {
 				chunk_length_s: 30,
 				stride_length_s: 5,
 			};

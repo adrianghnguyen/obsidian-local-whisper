@@ -34,14 +34,14 @@ export default class LocalWhisperPlugin extends Plugin {
 
 		this.addSettingTab(new LocalWhisperSettingTab(this.app, this));
 
-		console.log('Local Whisper plugin loaded');
+		console.debug('Local Whisper plugin loaded');
 	}
 
 	onunload() {
 		if (this.transcriptionService) {
 			this.transcriptionService.dispose();
 		}
-		console.log('Local Whisper plugin unloaded');
+		console.debug('Local Whisper plugin unloaded');
 	}
 
 	openRecordingModal(editor?: Editor) {
@@ -66,7 +66,7 @@ export default class LocalWhisperPlugin extends Plugin {
 								const currentEditor = activeView.editor;
 								currentEditor.replaceSelection(text);
 							} else {
-								navigator.clipboard.writeText(text);
+								await navigator.clipboard.writeText(text);
 								new Notice('Transcription copied to clipboard!');
 							}
 						}
